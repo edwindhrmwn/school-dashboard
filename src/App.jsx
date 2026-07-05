@@ -17,7 +17,7 @@ export default function App() {
   const { isAuthenticated, initializing, user, signIn, signOut } = useAuth()
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/login" element={
           isAuthenticated && !initializing
