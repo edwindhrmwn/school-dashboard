@@ -4,7 +4,7 @@ export const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID
 // IS_ACTIVE | INSERTED_BY | INSERTED_DATE | UPDATED_BY | UPDATED_DATE
 export const SHEETS = {
   SISWA: { tab: 'Siswa', lastCol: 'AG' },
-  KELAS: { tab: 'Kelas', lastCol: 'I' },
+  KELAS: { tab: 'Kelas', lastCol: 'K' },
   EKSTRA: { tab: 'Ekstrakulikuler', lastCol: 'H' },
   NILAI: { tab: 'Nilai_Ekstra', lastCol: 'J' },
   USER_AKSES: { tab: 'User_Akses', lastCol: 'F' },
@@ -122,12 +122,22 @@ export function rowToKelas(row, rowIndex) {
     className: row[1] ?? '',
     pic1: row[2] ?? '',
     pic2: row[3] ?? '',
-    ...parseMeta(row, 4),
+    noInduk1: row[4] ?? '',
+    noInduk2: row[5] ?? '',
+    ...parseMeta(row, 6),
   }
 }
 
 export function kelasToRow(data) {
-  return [data.id ?? '', data.className ?? '', data.pic1 ?? '', data.pic2 ?? '', ...metaToCells(data)]
+  return [
+    data.id ?? '',
+    data.className ?? '',
+    data.pic1 ?? '',
+    data.pic2 ?? '',
+    data.noInduk1 ?? '',
+    data.noInduk2 ?? '',
+    ...metaToCells(data),
+  ]
 }
 
 export function rowToEkstra(row, rowIndex) {

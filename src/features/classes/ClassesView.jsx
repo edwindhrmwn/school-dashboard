@@ -10,7 +10,7 @@ const COLUMNS = [
   { key: 'pic2', label: 'Guru 2 (PIC 2)' },
 ]
 
-export function ClassesView({ classes, loading, onCreate, onUpdate, onDelete }) {
+export function ClassesView({ classes, loading, teachers, onCreate, onUpdate, onDelete }) {
   const [modal, setModal] = useState(null)
   const [selected, setSelected] = useState(null)
 
@@ -48,7 +48,7 @@ export function ClassesView({ classes, loading, onCreate, onUpdate, onDelete }) 
       </div>
       {modal && (
         <Modal title={modal === 'create' ? 'Tambah Kelas' : 'Edit Kelas'} onClose={closeModal}>
-          <ClassFormView initialValues={selected} onSubmit={handleSubmit} onCancel={closeModal} />
+          <ClassFormView initialValues={selected} teachers={teachers} onSubmit={handleSubmit} onCancel={closeModal} />
         </Modal>
       )}
     </div>
