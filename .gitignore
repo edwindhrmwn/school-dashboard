@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.env.local
+.DS_Store
+
+# Local machine-specific / stray files
+.claude/settings.local.json
+image.png
+*.png
