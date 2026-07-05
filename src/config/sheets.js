@@ -3,7 +3,7 @@ export const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID
 // lastCol includes the 5 rightmost meta columns:
 // IS_ACTIVE | INSERTED_BY | INSERTED_DATE | UPDATED_BY | UPDATED_DATE
 export const SHEETS = {
-  SISWA: { tab: 'Siswa', lastCol: 'AF' },
+  SISWA: { tab: 'Siswa', lastCol: 'AG' },
   KELAS: { tab: 'Kelas', lastCol: 'I' },
   EKSTRA: { tab: 'Ekstrakulikuler', lastCol: 'G' },
   NILAI: { tab: 'Nilai_Ekstra', lastCol: 'J' },
@@ -72,9 +72,10 @@ export function rowToStudent(row, rowIndex) {
     emailBunda: row[22] ?? '',
     saudara: row[23] ?? '',
     keterangan: row[24] ?? '',
-    ekstrakulikuler: row[25] ?? '',
-    status: row[26] ?? 'Aktif',
-    ...parseMeta(row, 27),
+    ekstrakulikuler1: row[25] ?? '',
+    ekstrakulikuler2: row[26] ?? '',
+    status: row[27] ?? 'Aktif',
+    ...parseMeta(row, 28),
   }
 }
 
@@ -105,7 +106,8 @@ export function studentToRow(data) {
     data.emailBunda ?? '',
     data.saudara ?? '',
     data.keterangan ?? '',
-    data.ekstrakulikuler ?? '',
+    data.ekstrakulikuler1 ?? '',
+    data.ekstrakulikuler2 ?? '',
     data.status ?? 'Aktif',
     ...metaToCells(data),
   ]

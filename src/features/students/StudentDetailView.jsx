@@ -102,7 +102,8 @@ export function StudentDetailView({ student, points, onEdit, onClose }) {
         <Row label="Jenis Kelamin" value={student.jenisKelamin} />
         <Row label="Tempat, Tgl Lahir" value={`${student.tempat}, ${student.tglLahir}`} />
         <Row label="Usia" value={student.usia ? `${student.usia} tahun` : ''} />
-        <Row label="Ekstrakulikuler" value={student.ekstrakulikuler} />
+        <Row label="Ekstrakulikuler 1" value={student.ekstrakulikuler1} />
+        <Row label="Ekstrakulikuler 2" value={student.ekstrakulikuler2} />
         <Row label="Guru 1 (Wali Kelas)" value={student.guru1 ?? student.waliKelas1} />
         <Row label="Guru 2 (Wali Kelas)" value={student.guru2 ?? student.waliKelas2} />
       </Section>

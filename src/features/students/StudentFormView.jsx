@@ -17,7 +17,7 @@ export function StudentFormView({ initialValues, classes, extracurriculars, onSu
     defaultValues: initialValues ?? {
       nis: '', nisn: '', namaSiswa: '', panggilan: '',
       jenisKelamin: '', tempat: '', tglLahir: '', usia: '',
-      kelas: '', ekstrakulikuler: '', status: 'Aktif',
+      kelas: '', ekstrakulikuler1: '', ekstrakulikuler2: '', status: 'Aktif',
       namaAyah: '', namaBunda: '', ttlAyah: '', ttlBunda: '',
       pekerjaanAyah: '', pekerjaanBunda: '', alamat: '', asalSekolah: '',
       noAyah: '', noBunda: '', emailAyah: '', emailBunda: '',
@@ -40,6 +40,10 @@ export function StudentFormView({ initialValues, classes, extracurriculars, onSu
   // Guru 1/2 otomatis dari kelas terpilih (join ke data Kelas)
   const selectedKelas = watch('kelas')
   const matchedClass = classes.find((c) => c.className === selectedKelas)
+
+  // Cegah memilih ekstrakulikuler yang sama di kedua slot
+  const selectedEkstra1 = watch('ekstrakulikuler1')
+  const selectedEkstra2 = watch('ekstrakulikuler2')
 
   const section = 'pt-4 border-t border-gray-100 mt-2'
   const grid2 = 'grid grid-cols-1 sm:grid-cols-2 gap-4'
@@ -102,13 +106,25 @@ export function StudentFormView({ initialValues, classes, extracurriculars, onSu
             </Select>
           </FormField>
         </div>
-        <div className="mt-4">
-          <FormField label="Ekstrakulikuler" error={errors.ekstrakulikuler?.message}>
-            <Select {...register('ekstrakulikuler')}>
+        <div className={`${grid2} mt-4`}>
+          <FormField label="Ekstrakulikuler 1" error={errors.ekstrakulikuler1?.message}>
+            <Select {...register('ekstrakulikuler1')}>
               <option value="">Tidak ada</option>
-              {extracurriculars.map((e) => (
-                <option key={e._rowIndex} value={e.name}>{e.name}</option>
-              ))}
+              {extracurriculars
+                .filter((e) => e.name !== selectedEkstra2)
+                .map((e) => (
+                  <option key={e._rowIndex} value={e.name}>{e.name}</option>
+                ))}
+            </Select>
+          </FormField>
+          <FormField label="Ekstrakulikuler 2" error={errors.ekstrakulikuler2?.message}>
+            <Select {...register('ekstrakulikuler2')}>
+              <option value="">Tidak ada</option>
+              {extracurriculars
+                .filter((e) => e.name !== selectedEkstra1)
+                .map((e) => (
+                  <option key={e._rowIndex} value={e.name}>{e.name}</option>
+                ))}
             </Select>
           </FormField>
         </div>

@@ -19,7 +19,14 @@ export const studentSchema = yup.object({
       return new Date(val) <= new Date()
     }),
   kelas: yup.string().required('Kelas wajib diisi'),
-  ekstrakulikuler: yup.string().optional(),
+  ekstrakulikuler1: yup.string().optional(),
+  ekstrakulikuler2: yup
+    .string()
+    .optional()
+    .test('not-same', 'Ekstrakulikuler 2 tidak boleh sama dengan Ekstrakulikuler 1', function (val) {
+      if (!val) return true
+      return val !== this.parent.ekstrakulikuler1
+    }),
   status: yup
     .string()
     .oneOf(['Aktif', 'Tidak Aktif', 'Pindah', 'Lulus'])
