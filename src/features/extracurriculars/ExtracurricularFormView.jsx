@@ -1,9 +1,13 @@
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { extracurricularSchema } from './extracurricularValidation'
-import { FormField, Input } from '../../components/FormField'
+import { FormField, Input, Select } from '../../components/FormField'
 
-export function ExtracurricularFormView({ initialValues, onSubmit, onCancel }) {
+function teacherLabel(t) {
+  return [t.titleBeforeName, t.name, t.titleAfterName].filter(Boolean).join(' ')
+}
+
+export function ExtracurricularFormView({ initialValues, teachers = [], onSubmit, onCancel }) {
   const {
     register,
     handleSubmit,
@@ -11,16 +15,30 @@ export function ExtracurricularFormView({ initialValues, onSubmit, onCancel }) {
   } = useForm({
     resolver: yupResolver(extracurricularSchema),
     defaultValues: initialValues
-      ? { name: initialValues.name, coach: initialValues.coach }
-      : { name: '', coach: '' },
+      ? { name: initialValues.name, pembina: initialValues.pembina, coach: initialValues.coach }
+      : { name: '', pembina: '', coach: '' },
   })
+
+  // Pastikan pembina tersimpan tetap muncul walau guru sudah tidak aktif/berubah
+  const pembinaOptions = teachers.map(teacherLabel)
+  if (initialValues?.pembina && !pembinaOptions.includes(initialValues.pembina)) {
+    pembinaOptions.unshift(initialValues.pembina)
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <FormField label="Nama Ekstrakulikuler" error={errors.name?.message} required>
         <Input {...register('name')} placeholder="cth. Pramuka" />
       </FormField>
-      <FormField label="Nama Pembina" error={errors.coach?.message} required>
+      <FormField label="Pembina (Guru)" error={errors.pembina?.message}>
+        <Select {...register('pembina')}>
+          <option value="">Tidak ada</option>
+          {pembinaOptions.map((label) => (
+            <option key={label} value={label}>{label}</option>
+          ))}
+        </Select>
+      </FormField>
+      <FormField label="Pelatih (Coach)" error={errors.coach?.message} required>
         <Input {...register('coach')} placeholder="cth. Budi Santoso" />
       </FormField>
       <div className="flex justify-end gap-2 pt-2">

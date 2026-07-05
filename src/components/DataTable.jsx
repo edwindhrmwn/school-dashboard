@@ -25,29 +25,32 @@ export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable
     else { setSortKey(key); setSortDir('asc') }
   }
 
+  const thBase = 'px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50'
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full min-h-0">
       {searchable && (
         <input
           type="text"
           placeholder="Cari..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full max-w-sm rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full max-w-sm shrink-0 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
       )}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="flex-1 min-h-0 flex flex-col rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-auto">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="border-b border-gray-200 sticky top-0 z-10">
             <tr>
               {!hideIndex && (
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-8">#</th>
+                <th className={`${thBase} w-8`}>#</th>
               )}
               {columns.map((col) => (
                 <th
                   key={col.key}
                   onClick={() => toggleSort(col.key)}
-                  className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                  className={`${thBase} cursor-pointer select-none hover:bg-gray-100`}
                 >
                   {col.label}
                   {sortKey === col.key && (
@@ -55,7 +58,7 @@ export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable
                   )}
                 </th>
               ))}
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+              <th className={`${thBase} text-right`}>Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -103,8 +106,9 @@ export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable
             )}
           </tbody>
         </table>
+        </div>
         {!loading && sorted.length > 0 && (
-          <div className="px-4 py-2 border-t border-gray-100 text-xs text-gray-400">
+          <div className="shrink-0 px-4 py-2 border-t border-gray-100 text-xs text-gray-400 bg-white">
             Menampilkan {sorted.length} dari {rows.length} data
           </div>
         )}

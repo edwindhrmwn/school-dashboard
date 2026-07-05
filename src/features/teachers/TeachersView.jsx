@@ -29,8 +29,8 @@ export function TeachersView({ teachers, loading, classes, onCreate, onUpdate, o
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6 h-full flex flex-col min-h-0">
+      <div className="flex items-center justify-between mb-6 shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Guru</h1>
           <p className="text-sm text-gray-500 mt-0.5">Kelola data guru</p>
@@ -40,14 +40,16 @@ export function TeachersView({ teachers, loading, classes, onCreate, onUpdate, o
           + Tambah Guru
         </button>
       </div>
-      <DataTable
-        columns={COLUMNS}
-        rows={teachers}
-        loading={loading}
-        hideIndex
-        onEdit={openEdit}
-        onDelete={(row) => onDelete(row._rowIndex)}
-      />
+      <div className="flex-1 min-h-0">
+        <DataTable
+          columns={COLUMNS}
+          rows={teachers}
+          loading={loading}
+          hideIndex
+          onEdit={openEdit}
+          onDelete={(row) => onDelete(row._rowIndex)}
+        />
+      </div>
       {modal && (
         <Modal title={modal === 'create' ? 'Tambah Guru' : 'Edit Guru'} onClose={closeModal}>
           <TeacherFormView

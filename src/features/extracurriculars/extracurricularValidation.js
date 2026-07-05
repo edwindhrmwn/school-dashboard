@@ -7,10 +7,11 @@ export const extracurricularSchema = yup.object({
     .min(2, 'Nama minimal 2 karakter')
     .max(100, 'Nama maksimal 100 karakter')
     .required('Nama wajib diisi'),
+  pembina: yup.string().trim().max(100).optional(),
   coach: yup
     .string()
     .trim()
-    .min(2, 'Nama pembina minimal 2 karakter')
-    .max(100, 'Nama pembina maksimal 100 karakter')
-    .required('Nama pembina wajib diisi'),
+    .min(2, 'Nama pelatih minimal 2 karakter')
+    .max(100, 'Nama pelatih maksimal 100 karakter')
+    .required('Nama pelatih wajib diisi'),
 })

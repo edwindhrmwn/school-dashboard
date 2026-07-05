@@ -28,16 +28,23 @@ export function PointFormView({ initialValues, extracurriculars, classes, studen
 
   const nisn = watch('nisn')
   const levelClass = watch('levelClass')
+  const extracurricular = watch('extracurricular')
 
-  // LOV murid: daftar siswa yang berada di kelas terpilih.
+  // LOV murid: siswa di kelas terpilih DAN terdaftar di ekstrakulikuler terpilih (Ekstra 1/2).
   const studentOptions = useMemo(() => {
-    const inClass = students.filter((s) => s.kelas === levelClass)
-    // Saat edit, siswa historis bisa sudah pindah kelas — pastikan opsi tersimpan tetap ada.
-    if (isEdit && nisn && !inClass.some((s) => s.nisn === nisn)) {
-      return [{ nisn, namaSiswa: initialValues.namaLengkap, _rowIndex: `keep-${nisn}` }, ...inClass]
+    const inScope = students.filter(
+      (s) =>
+        s.kelas === levelClass &&
+        (!extracurricular ||
+          s.ekstrakulikuler1 === extracurricular ||
+          s.ekstrakulikuler2 === extracurricular),
+    )
+    // Saat edit, siswa historis bisa sudah pindah/berubah — pastikan opsi tersimpan tetap ada.
+    if (isEdit && nisn && !inScope.some((s) => s.nisn === nisn)) {
+      return [{ nisn, namaSiswa: initialValues.namaLengkap, _rowIndex: `keep-${nisn}` }, ...inScope]
     }
-    return inClass
-  }, [students, levelClass, isEdit, nisn, initialValues])
+    return inScope
+  }, [students, levelClass, extracurricular, isEdit, nisn, initialValues])
 
   function pickStudent(selectedNisn) {
     const match = studentOptions.find((s) => s.nisn === selectedNisn)
@@ -45,19 +52,27 @@ export function PointFormView({ initialValues, extracurriculars, classes, studen
     setValue('namaLengkap', match ? match.namaSiswa : '', { shouldValidate: true })
   }
 
-  function selectClass(cls) {
-    setValue('levelClass', cls, { shouldValidate: true })
-    // Reset pilihan murid saat kelas berubah (kecuali edit yang membiarkan nilai awal)
+  function resetStudent() {
     if (!isEdit) {
       setValue('nisn', '')
       setValue('namaLengkap', '')
     }
   }
+  function selectExtra(name) {
+    setValue('extracurricular', name, { shouldValidate: true })
+    resetStudent()
+  }
+  function selectClass(cls) {
+    setValue('levelClass', cls, { shouldValidate: true })
+    resetStudent()
+  }
+
+  const muridReady = !!levelClass && !!extracurricular
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <FormField label="Ekstrakulikuler" error={errors.extracurricular?.message} required>
-        <Select {...register('extracurricular')}>
+        <Select value={extracurricular} onChange={(e) => selectExtra(e.target.value)}>
           <option value="">Pilih ekstrakulikuler...</option>
           {extracurriculars.map((e) => (
             <option key={e._rowIndex} value={e.name}>{e.name}</option>
@@ -73,8 +88,8 @@ export function PointFormView({ initialValues, extracurriculars, classes, studen
         </Select>
       </FormField>
       <FormField label="Murid" error={errors.nisn?.message || errors.namaLengkap?.message} required>
-        <Select value={nisn} onChange={(e) => pickStudent(e.target.value)} disabled={!levelClass}>
-          <option value="">{levelClass ? 'Pilih murid...' : 'Pilih kelas dulu'}</option>
+        <Select value={nisn} onChange={(e) => pickStudent(e.target.value)} disabled={!muridReady}>
+          <option value="">{muridReady ? 'Pilih murid...' : 'Pilih ekstra & kelas dulu'}</option>
           {studentOptions.map((s) => (
             <option key={s._rowIndex} value={s.nisn}>
               {s.namaSiswa} — {s.nisn}
@@ -82,8 +97,8 @@ export function PointFormView({ initialValues, extracurriculars, classes, studen
           ))}
         </Select>
       </FormField>
-      {levelClass && studentOptions.length === 0 && (
-        <p className="text-xs text-amber-600 -mt-2">Tidak ada murid di kelas ini.</p>
+      {muridReady && studentOptions.length === 0 && (
+        <p className="text-xs text-amber-600 -mt-2">Tidak ada murid di kelas ini yang terdaftar pada ekstrakulikuler tersebut.</p>
       )}
       <FormField label="Poin (0-100)" error={errors.point?.message} required>
         <Input type="number" {...register('point')} min={0} max={100} />
