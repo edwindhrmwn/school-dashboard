@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 const NAV = [
   { to: '/students', label: 'Data Siswa', icon: '👤' },
   { to: '/classes', label: 'Kelas', icon: '🏫' },
+  { to: '/teachers', label: 'Guru', icon: '🧑‍🏫' },
   { to: '/extracurriculars', label: 'Ekstrakulikuler', icon: '⚽' },
   { to: '/points', label: 'Nilai Ekstra', icon: '🏆' },
   { to: '/promotion', label: 'Naik Kelas', icon: '⬆️' },
@@ -10,11 +11,11 @@ const NAV = [
 
 export function Sidebar({ user, onSignOut }) {
   return (
-    <aside className="w-60 shrink-0 bg-primary-900 text-white flex flex-col min-h-screen">
-      <div className="px-6 py-5 border-b border-primary-700">
+    <aside className="w-60 shrink-0 bg-primary-900 text-white flex flex-col h-full">
+      <div className="px-6 py-5 border-b border-primary-700 shrink-0">
         <h1 className="text-lg font-bold leading-tight">School<br />Dashboard</h1>
       </div>
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-1">
         {NAV.map(({ to, label, icon }) => (
           <NavLink
             key={to}
@@ -33,7 +34,7 @@ export function Sidebar({ user, onSignOut }) {
         ))}
       </nav>
       {user && (
-        <div className="px-4 py-4 border-t border-primary-700">
+        <div className="px-4 py-4 border-t border-primary-700 shrink-0">
           <div className="flex items-center gap-3 mb-3">
             {user.picture && (
               <img src={user.picture} alt="" className="w-8 h-8 rounded-full" />

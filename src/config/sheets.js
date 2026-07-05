@@ -8,6 +8,7 @@ export const SHEETS = {
   EKSTRA: { tab: 'Ekstrakulikuler', lastCol: 'G' },
   NILAI: { tab: 'Nilai_Ekstra', lastCol: 'J' },
   USER_AKSES: { tab: 'User_Akses', lastCol: 'F' },
+  GURU: { tab: 'Guru', lastCol: 'K' },
 }
 
 // sheetId integers (needed for deleteDimension) — populated at runtime by sheetsClient.init()
@@ -17,6 +18,7 @@ export const sheetIds = {
   Ekstrakulikuler: null,
   Nilai_Ekstra: null,
   User_Akses: null,
+  Guru: null,
 }
 
 // ── Meta (audit) columns: always the 5 rightmost cells ────────────────────────
@@ -161,4 +163,29 @@ export function nilaiToRow(data) {
 
 export function rowToUserAkses(row, rowIndex) {
   return { _rowIndex: rowIndex, email: row[0] ?? '', ...parseMeta(row, 1) }
+}
+
+export function rowToGuru(row, rowIndex) {
+  return {
+    _rowIndex: rowIndex,
+    noInduk: row[0] ?? '',
+    name: row[1] ?? '',
+    titleBeforeName: row[2] ?? '',
+    titleAfterName: row[3] ?? '',
+    className: row[4] ?? '',
+    pic: row[5] ?? '',
+    ...parseMeta(row, 6),
+  }
+}
+
+export function guruToRow(data) {
+  return [
+    data.noInduk ?? '',
+    data.name ?? '',
+    data.titleBeforeName ?? '',
+    data.titleAfterName ?? '',
+    data.className ?? '',
+    data.pic ?? '',
+    ...metaToCells(data),
+  ]
 }

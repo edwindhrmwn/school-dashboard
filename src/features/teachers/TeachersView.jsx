@@ -1,16 +1,20 @@
 import { useState } from 'react'
 import { DataTable } from '../../components/DataTable'
 import { Modal } from '../../components/Modal'
-import { ClassFormView } from './ClassFormView'
+import { TeacherFormView } from './TeacherFormView'
 
 const COLUMNS = [
-  { key: 'id', label: 'ID' },
-  { key: 'className', label: 'Nama Kelas' },
-  { key: 'pic1', label: 'Guru 1 (PIC 1)' },
-  { key: 'pic2', label: 'Guru 2 (PIC 2)' },
+  { key: 'noInduk', label: 'No. Induk' },
+  {
+    key: 'name',
+    label: 'Nama',
+    render: (v, row) => [row.titleBeforeName, v, row.titleAfterName].filter(Boolean).join(' '),
+  },
+  { key: 'className', label: 'Kelas', render: (v) => v || '—' },
+  { key: 'pic', label: 'PIC', render: (v) => v || '—' },
 ]
 
-export function ClassesView({ classes, loading, onCreate, onUpdate, onDelete }) {
+export function TeachersView({ teachers, loading, classes, onCreate, onUpdate, onDelete }) {
   const [modal, setModal] = useState(null)
   const [selected, setSelected] = useState(null)
 
@@ -20,7 +24,7 @@ export function ClassesView({ classes, loading, onCreate, onUpdate, onDelete }) 
 
   async function handleSubmit(data) {
     if (modal === 'create') await onCreate(data)
-    else await onUpdate(selected._rowIndex, { ...data, id: selected.id })
+    else await onUpdate(selected._rowIndex, data)
     closeModal()
   }
 
@@ -28,25 +32,30 @@ export function ClassesView({ classes, loading, onCreate, onUpdate, onDelete }) 
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Kelas</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Kelola level dan nama kelas</p>
+          <h1 className="text-2xl font-bold text-gray-900">Guru</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Kelola data guru</p>
         </div>
         <button onClick={openCreate}
           className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 font-medium">
-          + Tambah Kelas
+          + Tambah Guru
         </button>
       </div>
       <DataTable
         columns={COLUMNS}
-        rows={classes}
+        rows={teachers}
         loading={loading}
         hideIndex
         onEdit={openEdit}
         onDelete={(row) => onDelete(row._rowIndex)}
       />
       {modal && (
-        <Modal title={modal === 'create' ? 'Tambah Kelas' : 'Edit Kelas'} onClose={closeModal}>
-          <ClassFormView initialValues={selected} onSubmit={handleSubmit} onCancel={closeModal} />
+        <Modal title={modal === 'create' ? 'Tambah Guru' : 'Edit Guru'} onClose={closeModal}>
+          <TeacherFormView
+            initialValues={selected}
+            classes={classes}
+            onSubmit={handleSubmit}
+            onCancel={closeModal}
+          />
         </Modal>
       )}
     </div>

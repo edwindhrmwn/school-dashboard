@@ -29,9 +29,13 @@ const COLUMNS = [
   },
 ]
 
+const STATUS_OPTIONS = ['Aktif', 'Tidak Aktif', 'Pindah', 'Lulus']
+
 export function StudentsView({ students, loading, classes, extracurriculars, points, onCreate, onUpdate, onDelete }) {
   const [modal, setModal] = useState(null)
   const [selected, setSelected] = useState(null)
+  const [filterKelas, setFilterKelas] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
 
   // Inner join: student.kelas → Kelas.className, ambil PIC_1/PIC_2 sebagai Guru 1/2
   const classMap = useMemo(() => {
@@ -48,6 +52,16 @@ export function StudentsView({ students, loading, classes, extracurriculars, poi
         guru2: classMap[s.kelas]?.pic2 ?? '',
       })),
     [students, classMap],
+  )
+
+  const filteredStudents = useMemo(
+    () =>
+      enrichedStudents.filter(
+        (s) =>
+          (!filterKelas || s.kelas === filterKelas) &&
+          (!filterStatus || s.status === filterStatus),
+      ),
+    [enrichedStudents, filterKelas, filterStatus],
   )
 
   function openDetail(row) { setSelected(row); setModal('detail') }
@@ -97,9 +111,40 @@ export function StudentsView({ students, loading, classes, extracurriculars, poi
         </button>
       </div>
 
+      <div className="flex gap-3 mb-4 flex-wrap">
+        <select
+          value={filterKelas}
+          onChange={(e) => setFilterKelas(e.target.value)}
+          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="">Semua Kelas</option>
+          {classes.map((c) => (
+            <option key={c._rowIndex} value={c.className}>{c.className}</option>
+          ))}
+        </select>
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="">Semua Status</option>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        {(filterKelas || filterStatus) && (
+          <button
+            onClick={() => { setFilterKelas(''); setFilterStatus('') }}
+            className="text-sm text-gray-500 hover:text-gray-700 px-2"
+          >
+            × Reset filter
+          </button>
+        )}
+      </div>
+
       <DataTable
         columns={columnsWithClick}
-        rows={enrichedStudents}
+        rows={filteredStudents}
         loading={loading}
         onEdit={openEdit}
         onDelete={(row) => onDelete(row._rowIndex)}

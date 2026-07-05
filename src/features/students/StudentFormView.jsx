@@ -5,16 +5,33 @@ import { differenceInYears, parseISO } from 'date-fns'
 import { studentSchema } from './studentValidation'
 import { FormField, Input, Select, Textarea } from '../../components/FormField'
 
+// TTL disimpan tetap 1 kolom "Tempat, YYYY-MM-DD". Helper pisah/gabung untuk UI.
+function splitTTL(str) {
+  const s = String(str ?? '').trim()
+  const m = s.match(/(\d{4}-\d{2}-\d{2})$/)
+  if (m) return { tempat: s.slice(0, m.index).replace(/[,\s]+$/, ''), tgl: m[1] }
+  return { tempat: s, tgl: '' }
+}
+function joinTTL(tempat, tgl) {
+  return [String(tempat ?? '').trim(), String(tgl ?? '').trim()].filter(Boolean).join(', ')
+}
+// Hanya izinkan digit (untuk NIS/NISN yang bertipe string tapi numerik)
+const digitsOnly = (e) => { e.target.value = e.target.value.replace(/\D/g, '') }
+
 export function StudentFormView({ initialValues, classes, extracurriculars, onSubmit, onCancel }) {
+  const ttlA = splitTTL(initialValues?.ttlAyah)
+  const ttlB = splitTTL(initialValues?.ttlBunda)
+
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(studentSchema),
-    defaultValues: initialValues ?? {
+    defaultValues: {
       nis: '', nisn: '', namaSiswa: '', panggilan: '',
       jenisKelamin: '', tempat: '', tglLahir: '', usia: '',
       kelas: '', ekstrakulikuler1: '', ekstrakulikuler2: '', status: 'Aktif',
@@ -22,7 +39,23 @@ export function StudentFormView({ initialValues, classes, extracurriculars, onSu
       pekerjaanAyah: '', pekerjaanBunda: '', alamat: '', asalSekolah: '',
       noAyah: '', noBunda: '', emailAyah: '', emailBunda: '',
       saudara: '', keterangan: '', waliKelas1: '', waliKelas2: '',
+      ...(initialValues ?? {}),
+      // field UI terpisah untuk TTL (tidak disimpan langsung; digabung saat submit)
+      tempatLahirAyah: ttlA.tempat, tglLahirAyah: ttlA.tgl,
+      tempatLahirBunda: ttlB.tempat, tglLahirBunda: ttlB.tgl,
     },
+  })
+
+  // Gabungkan kembali TTL sebelum diteruskan ke onSubmit.
+  // Ambil field split via getValues (bukan dari `data`) agar tidak terpengaruh cast schema.
+  const submit = handleSubmit((data) => {
+    const v = getValues()
+    const { tempatLahirAyah, tglLahirAyah, tempatLahirBunda, tglLahirBunda, ...rest } = data
+    onSubmit({
+      ...rest,
+      ttlAyah: joinTTL(v.tempatLahirAyah, v.tglLahirAyah),
+      ttlBunda: joinTTL(v.tempatLahirBunda, v.tglLahirBunda),
+    })
   })
 
   const tglLahir = watch('tglLahir')
@@ -49,14 +82,14 @@ export function StudentFormView({ initialValues, classes, extracurriculars, onSu
   const grid2 = 'grid grid-cols-1 sm:grid-cols-2 gap-4'
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
+    <form onSubmit={submit} className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-1">
       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Data Pokok</p>
       <div className={grid2}>
         <FormField label="NIS" error={errors.nis?.message} required>
-          <Input {...register('nis')} placeholder="cth. 2024001" />
+          <Input {...register('nis')} inputMode="numeric" onInput={digitsOnly} placeholder="cth. 2024001" maxLength={20} />
         </FormField>
         <FormField label="NISN" error={errors.nisn?.message} required>
-          <Input {...register('nisn')} placeholder="10 digit angka" maxLength={10} />
+          <Input {...register('nisn')} inputMode="numeric" onInput={digitsOnly} placeholder="10 digit angka" maxLength={10} />
         </FormField>
       </div>
       <FormField label="Nama Lengkap Siswa" error={errors.namaSiswa?.message} required>
@@ -147,11 +180,17 @@ export function StudentFormView({ initialValues, classes, extracurriculars, onSu
           <FormField label="Nama Bunda" error={errors.namaBunda?.message}>
             <Input {...register('namaBunda')} />
           </FormField>
-          <FormField label="TTL Ayah" error={errors.ttlAyah?.message}>
-            <Input {...register('ttlAyah')} placeholder="Tempat, DD/MM/YYYY" />
+          <FormField label="Tempat Lahir Ayah" error={errors.tempatLahirAyah?.message}>
+            <Input {...register('tempatLahirAyah')} placeholder="cth. Jakarta" />
           </FormField>
-          <FormField label="TTL Bunda" error={errors.ttlBunda?.message}>
-            <Input {...register('ttlBunda')} placeholder="Tempat, DD/MM/YYYY" />
+          <FormField label="Tanggal Lahir Ayah" error={errors.tglLahirAyah?.message}>
+            <Input type="date" {...register('tglLahirAyah')} />
+          </FormField>
+          <FormField label="Tempat Lahir Bunda" error={errors.tempatLahirBunda?.message}>
+            <Input {...register('tempatLahirBunda')} placeholder="cth. Bandung" />
+          </FormField>
+          <FormField label="Tanggal Lahir Bunda" error={errors.tglLahirBunda?.message}>
+            <Input type="date" {...register('tglLahirBunda')} />
           </FormField>
           <FormField label="Pekerjaan Ayah" error={errors.pekerjaanAyah?.message}>
             <Input {...register('pekerjaanAyah')} />

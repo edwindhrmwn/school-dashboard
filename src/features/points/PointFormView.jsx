@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { pointsSchema } from './pointsValidation'
@@ -6,7 +6,6 @@ import { FormField, Input, Select } from '../../components/FormField'
 
 export function PointFormView({ initialValues, extracurriculars, classes, students, onSubmit, onCancel }) {
   const isEdit = !!initialValues
-  const initialNama = initialValues?.namaLengkap ?? ''
 
   const {
     register,
@@ -29,19 +28,31 @@ export function PointFormView({ initialValues, extracurriculars, classes, studen
 
   const nisn = watch('nisn')
   const levelClass = watch('levelClass')
-  const namaLengkap = watch('namaLengkap')
 
-  // NISN divalidasi ke siswa yang berada di kelas terpilih.
-  // Saat edit, fallback ke pencarian NISN saja agar data historis (siswa yg sudah naik kelas) tetap terjaga.
-  useEffect(() => {
-    let match = students.find((s) => s.nisn === nisn && s.kelas === levelClass)
-    if (!match && isEdit) match = students.find((s) => s.nisn === nisn)
-    setValue('namaLengkap', match ? match.namaSiswa : isEdit ? initialNama : '', {
-      shouldValidate: false,
-    })
-  }, [nisn, levelClass, students, setValue, isEdit, initialNama])
+  // LOV murid: daftar siswa yang berada di kelas terpilih.
+  const studentOptions = useMemo(() => {
+    const inClass = students.filter((s) => s.kelas === levelClass)
+    // Saat edit, siswa historis bisa sudah pindah kelas — pastikan opsi tersimpan tetap ada.
+    if (isEdit && nisn && !inClass.some((s) => s.nisn === nisn)) {
+      return [{ nisn, namaSiswa: initialValues.namaLengkap, _rowIndex: `keep-${nisn}` }, ...inClass]
+    }
+    return inClass
+  }, [students, levelClass, isEdit, nisn, initialValues])
 
-  const showNotFound = !!levelClass && (nisn?.length ?? 0) > 0 && !namaLengkap
+  function pickStudent(selectedNisn) {
+    const match = studentOptions.find((s) => s.nisn === selectedNisn)
+    setValue('nisn', selectedNisn, { shouldValidate: true })
+    setValue('namaLengkap', match ? match.namaSiswa : '', { shouldValidate: true })
+  }
+
+  function selectClass(cls) {
+    setValue('levelClass', cls, { shouldValidate: true })
+    // Reset pilihan murid saat kelas berubah (kecuali edit yang membiarkan nilai awal)
+    if (!isEdit) {
+      setValue('nisn', '')
+      setValue('namaLengkap', '')
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -54,28 +65,26 @@ export function PointFormView({ initialValues, extracurriculars, classes, studen
         </Select>
       </FormField>
       <FormField label="Level - Kelas" error={errors.levelClass?.message} required>
-        <Select {...register('levelClass')}>
+        <Select value={levelClass} onChange={(e) => selectClass(e.target.value)}>
           <option value="">Pilih kelas...</option>
           {classes.map((c) => (
             <option key={c._rowIndex} value={c.className}>{c.className}</option>
           ))}
         </Select>
       </FormField>
-      <FormField
-        label="NISN"
-        error={errors.nisn?.message || (showNotFound ? 'Siswa not found' : undefined)}
-        required
-      >
-        <Input
-          {...register('nisn')}
-          placeholder={levelClass ? '10 digit' : 'Pilih kelas dulu'}
-          maxLength={10}
-          disabled={!levelClass}
-        />
+      <FormField label="Murid" error={errors.nisn?.message || errors.namaLengkap?.message} required>
+        <Select value={nisn} onChange={(e) => pickStudent(e.target.value)} disabled={!levelClass}>
+          <option value="">{levelClass ? 'Pilih murid...' : 'Pilih kelas dulu'}</option>
+          {studentOptions.map((s) => (
+            <option key={s._rowIndex} value={s.nisn}>
+              {s.namaSiswa} — {s.nisn}
+            </option>
+          ))}
+        </Select>
       </FormField>
-      <FormField label="Nama Lengkap" error={errors.namaLengkap?.message}>
-        <Input {...register('namaLengkap')} disabled placeholder="Otomatis dari NISN (kelas terpilih)" />
-      </FormField>
+      {levelClass && studentOptions.length === 0 && (
+        <p className="text-xs text-amber-600 -mt-2">Tidak ada murid di kelas ini.</p>
+      )}
       <FormField label="Poin (0-100)" error={errors.point?.message} required>
         <Input type="number" {...register('point')} min={0} max={100} />
       </FormField>

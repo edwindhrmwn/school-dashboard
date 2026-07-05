@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { LoadingSpinner } from './LoadingSpinner'
 
-export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable = true }) {
+export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable = true, hideIndex = false }) {
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState(null)
   const [sortDir, setSortDir] = useState('asc')
@@ -40,7 +40,9 @@ export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable
         <table className="min-w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-8">#</th>
+              {!hideIndex && (
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-8">#</th>
+              )}
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -58,17 +60,17 @@ export function DataTable({ columns, rows, loading, onEdit, onDelete, searchable
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
-              <tr><td colSpan={columns.length + 2}><LoadingSpinner /></td></tr>
+              <tr><td colSpan={columns.length + (hideIndex ? 1 : 2)}><LoadingSpinner /></td></tr>
             ) : sorted.length === 0 ? (
               <tr>
-                <td colSpan={columns.length + 2} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={columns.length + (hideIndex ? 1 : 2)} className="px-4 py-8 text-center text-gray-400">
                   Tidak ada data.
                 </td>
               </tr>
             ) : (
               sorted.map((row, i) => (
                 <tr key={row._rowIndex ?? i} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400">{i + 1}</td>
+                  {!hideIndex && <td className="px-4 py-3 text-gray-400">{i + 1}</td>}
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3 text-gray-700">
                       {col.render ? col.render(row[col.key], row) : (row[col.key] ?? '—')}

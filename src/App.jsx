@@ -12,6 +12,7 @@ const ClassesPage = lazy(() => import('./features/classes/ClassesPage'))
 const ExtracurricularsPage = lazy(() => import('./features/extracurriculars/ExtracurricularsPage'))
 const PointsPage = lazy(() => import('./features/points/PointsPage'))
 const PromotionPage = lazy(() => import('./features/promotion/PromotionPage'))
+const TeachersPage = lazy(() => import('./features/teachers/TeachersPage'))
 
 export default function App() {
   const { isAuthenticated, initializing, user, signIn, signOut } = useAuth()
@@ -33,6 +34,9 @@ export default function App() {
             } />
             <Route path="/classes" element={
               <Suspense fallback={<LoadingSpinner />}><ClassesPage /></Suspense>
+            } />
+            <Route path="/teachers" element={
+              <Suspense fallback={<LoadingSpinner />}><TeachersPage /></Suspense>
             } />
             <Route path="/extracurriculars" element={
               <Suspense fallback={<LoadingSpinner />}><ExtracurricularsPage /></Suspense>
